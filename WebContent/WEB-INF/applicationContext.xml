@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx = "http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+	http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd"
+	default-lazy-init="true">
+
+	<context:annotation-config />
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+	
+	<mvc:resources location="/resources/img" mapping="/resources/**" cache-period="5000" />
+
+	<context:component-scan base-package="br.com.project.geral.controller" />
+	<context:component-scan base-package="br.com.srv.interfaces" />
+	<context:component-scan base-package="br.com.srv.implementacao" />
+	<context:component-scan base-package="br.com.repository.interfaces" />
+	<context:component-scan base-package="br.com.dao.implementacao" />
+	<context:component-scan base-package="br.com.framework.controller.crud"/>
+	<context:component-scan base-package="br.com.framework.interfac.crud"/>
+
+	<!-- Data Source -->
+	<bean id="springDataSource" name="springDataSource" class="org.springframework.jndi.JndiObjectFactoryBean" lazy-init="false">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/datasouce</value> 
+		</property>
+	</bean>
+	
+	<bean id="flyway" class="org.flywaydb.core.Flyway" init-method="migrate" lazy-init="false"> 
+    	<property name="dataSource" ref="springDataSource"/> 
+    	<property name="baselineOnMigrate" value="true"/>  
+    	<property name="table" value="version"/> 
+    	<property name="sqlMigrationPrefix" value="v"/> 
+    	<property name="sqlMigrationSeparator" value="_"/>
+    	<property name="encoding" value="ISO-8859-1"/>
+    	<property name="validateOnMigrate" value="true"/>
+	</bean>
+	
+	
+	 <bean id="transactionManager" name="transactionManager"   
+         class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="false">
+         <property name="dataSource" ref="springDataSource"/>
+     </bean>  
+     
+     <bean id="jdbcTemplate" name="jdbcTemplate" class="br.com.framework.implementacao.crud.JdbcTemplateImpl" lazy-init="false">
+     	<constructor-arg name="dataSource" ref="springDataSource"/>
+     </bean>
+     
+     <bean id="simpleJdbcTemplate" name="simpleJdbcTemplate" class="br.com.framework.implementacao.crud.SimpleJdbcTemplateImpl" lazy-init="false">
+     	<constructor-arg name="dataSource" ref="springDataSource"/>
+     </bean>
+     
+      <bean id="simpleJdbcInsert" name="simpleJdbcInsert" class="br.com.framework.implementacao.crud.SimpleJdbcInsertImplents" lazy-init="false">
+     	<constructor-arg name="dataSource" ref="springDataSource"/>
+     </bean>
+     
+      <bean id="simpleJdbcClassImpl" name="simpleJdbcClassImpl" class="br.com.framework.implementacao.crud.SimpleJdbcClassImpl" lazy-init="false">
+         <constructor-arg name="dataSource" ref="springDataSource"/>
+     </bean>
+	
+	<bean id="urlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/index.jsp">indexController</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" /> 
+	</bean>
+
+
+	<bean name="indexController"
+		class="org.springframework.web.servlet.mvc.ParameterizableViewController" />
+
+	
+	<!-- Controler -->
+	<bean id="interfaceCrud" class="br.com.framework.implementacao.crud.ImplementacaoCrud" scope="singleton" lazy-init="false"/>
+	<bean id="controller" class="br.com.framework.controller.crud.Controller"/>
+	<bean id="entidadeController" class="br.com.project.geral.controller.EntidadeController" />
+	
+
+	<bean id="repositoryEntidade" class="br.com.dao.implementacao.DaoEntidade" />
+	<bean id="srvEntidade" class="br.com.srv.implementacao.SrvEntidadeImpl" /> 
+	<bean id="loginController" name="loginController"  class="br.com.project.geral.controller.LoginController" />
+
+	<bean id="cursoController" name="cursoController"  class="br.com.project.geral.controller.CursoController" />
+	<bean id="repositoryCurso" name="repositoryCurso"  class="br.com.dao.implementacao.DaoCurso" />
+	<bean id="srvCurso" name="srvCurso"  class="br.com.srv.implementacao.SrvCursoImpl" />
+	
+	<bean id="disciplinaController" name="disciplinaController"  class="br.com.project.geral.controller.DisciplinaController" />
+	<bean id="repositoryDisciplina" name="repositoryDisciplina"  class="br.com.dao.implementacao.DaoDisciplina" />
+	<bean id="srvDisciplina" name="srvDisciplina"  class="br.com.srv.implementacao.SrvDisciplinaImpl" />
+	
+	<bean id="laboratorioController" name="laboratorioController"  class="br.com.project.geral.controller.LaboratorioController" />
+	<bean id="repositoryLaboratorio" name="repositoryLaboratorio"  class="br.com.dao.implementacao.DaoLaboratorio" />
+	<bean id="srvLaboratorio" name="srvLaboratorio"  class="br.com.srv.implementacao.SrvLaboratorioImpl" />
+
+	<bean id="reservaController" name="reservaController"  class="br.com.project.geral.controller.ReservaController" />
+	<bean id="repositoryReserva" name="repositoryReserva"  class="br.com.dao.implementacao.DaoReserva" />
+	<bean id="srvReserva" name="srvReserva"  class="br.com.srv.implementacao.SrvReservaImpl" />
+	
+
+</beans>
+
